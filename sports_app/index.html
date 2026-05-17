@@ -3,124 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Rekomendasi Olahraga Cerdas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>FitAI - Portal Olahraga & Nutrisi Cerdas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
+    <!-- AUTHENTICATION PANELS (FULL SCREEN) -->
+    <div id="auth-container" class="auth-container">
         <!-- VIEW: LOGIN -->
-        <section id="view-login" class="view active glass-panel">
+        <section id="view-login" class="view auth-panel glass-panel active">
             <h1 class="logo-text">Fit<span class="accent">AI</span></h1>
-            <p>Sistem Rekomendasi Olahraga Cerdas</p>
+            <p class="subtitle">Portal Olahraga & Nutrisi Cerdas</p>
             <form id="login-form">
-                <input type="text" id="username" placeholder="Nama Pengguna" required>
-                <input type="password" id="password" placeholder="Kata Sandi (bebas)" required>
+                <input type="email" id="login-email" placeholder="Email Anda" required>
+                <input type="password" id="login-password" placeholder="Kata Sandi" required>
                 <button type="submit" class="btn primary-btn">Login</button>
             </form>
+            <p class="auth-switch">Belum punya akun? <span id="link-to-register">Daftar di sini</span></p>
         </section>
 
-        <!-- VIEW: IDENTITAS -->
-        <section id="view-identitas" class="view glass-panel">
-            <h2>Lengkapi Identitas Anda</h2>
-            <p>Data biometrik diperlukan agar AI dapat merekomendasikan olahraga yang tepat.</p>
-            <form id="identitas-form">
-                <div class="input-group">
-                    <label for="age">Usia (10-65 tahun):</label>
-                    <input type="number" id="age" min="10" max="65" required>
-                </div>
-                <div class="input-group">
-                    <label for="weight">Berat Badan (kg):</label>
-                    <input type="number" id="weight" min="20" max="200" required>
-                </div>
-                <div class="input-group">
-                    <label for="height">Tinggi Badan (cm):</label>
-                    <input type="number" id="height" min="100" max="250" required>
-                </div>
-                <div class="input-group">
-                    <label for="disability">Kondisi Khusus / Disabilitas:</label>
-                    <select id="disability">
-                        <option value="none">Tidak Ada (Sehat)</option>
-                        <option value="wheelchair">Pengguna Kursi Roda</option>
-                        <option value="asthma">Asma Ringan</option>
-                        <option value="joint_pain">Nyeri Sendi / Osteoartritis</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn primary-btn">Simpan & Lanjutkan</button>
+        <!-- VIEW: REGISTER -->
+        <section id="view-register" class="view auth-panel glass-panel">
+            <h1 class="logo-text">Fit<span class="accent">AI</span></h1>
+            <p class="subtitle">Buat Akun Baru</p>
+            <form id="register-form">
+                <input type="text" id="reg-name" placeholder="Nama Lengkap" required>
+                <input type="email" id="reg-email" placeholder="Email Aktif" required>
+                <input type="password" id="reg-password" placeholder="Kata Sandi" required>
+                <button type="submit" class="btn primary-btn">Daftar Sekarang</button>
             </form>
+            <p class="auth-switch">Sudah punya akun? <span id="link-to-login">Login di sini</span></p>
         </section>
+    </div>
 
-        <!-- VIEW: DASHBOARD -->
-        <section id="view-dashboard" class="view glass-panel">
-            <header class="dashboard-header">
-                <h2>Halo, <span id="user-display">User</span>! 👋</h2>
-                <button id="btn-logout" class="btn outline-btn small-btn">Logout</button>
-            </header>
-            
-            <div class="profile-card">
-                <h3>Profil Biometrik Anda</h3>
-                <p>Status: <strong id="profile-status" class="accent">Menganalisis...</strong></p>
+    <!-- MAIN APP LAYOUT (SIDEBAR + CONTENT - HIDDEN BY DEFAULT) -->
+    <div id="app-layout" class="app-layout hidden">
+        <!-- LEFT SIDEBAR -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h2 class="logo-text-sm">Fit<span class="accent">AI</span></h2>
+                <div class="user-avatar-card">
+                    <div class="avatar-circle" id="user-avatar-initials">U</div>
+                    <div class="avatar-info">
+                        <h4 id="sidebar-user-name">Nama User</h4>
+                        <p id="sidebar-user-role" class="role-badge">User</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="menu-grid">
-                <button id="btn-rekomendasi" class="card-btn">
-                    <span class="icon">🏃</span>
-                    Rekomendasi Olahraga
-                </button>
-                <button id="btn-misi" class="card-btn">
-                    <span class="icon">🎯</span>
-                    Misi Harian
-                </button>
-                <button id="btn-timer" class="card-btn">
-                    <span class="icon">⏱️</span>
-                    Mulai Olahraga (Timer)
-                </button>
-            </div>
-        </section>
+            <!-- NAVIGATION ITEMS (DYNAMICALLY SHOWN) -->
+            <nav class="sidebar-nav">
+                <!-- USER MENU -->
+                <ul id="menu-user-list" class="nav-list">
+                    <li class="nav-item active" data-target="view-dashboard">
+                        <span class="nav-icon">📊</span> Dashboard
+                    </li>
+                    <li class="nav-item" data-target="view-identitas">
+                        <span class="nav-icon">📝</span> Lengkapi Profil
+                    </li>
+                    <li class="nav-item" data-target="view-rekomendasi">
+                        <span class="nav-icon">🤖</span> Rekomendasi AI
+                    </li>
+                    <li class="nav-item" data-target="view-misi">
+                        <span class="nav-icon">🎯</span> Misi Harian
+                    </li>
+                    <li class="nav-item" data-target="view-timer">
+                        <span class="nav-icon">⏱️</span> Timer Olahraga
+                    </li>
+                    <li class="nav-item" data-target="view-riwayat">
+                        <span class="nav-icon">📜</span> Riwayat Misi
+                    </li>
+                    <li class="nav-item" data-target="view-feedback">
+                        <span class="nav-icon">⭐</span> Kirim Ulasan
+                    </li>
+                </ul>
 
-        <!-- VIEW: REKOMENDASI OLAHRAGA -->
-        <section id="view-rekomendasi" class="view glass-panel">
-            <button class="btn back-btn" data-target="view-dashboard">⬅ Kembali ke Dashboard</button>
-            <h2>Rekomendasi AI 🤖</h2>
-            <p>Berdasarkan profil Anda, berikut adalah olahraga terbaik:</p>
-            
-            <div id="rekomendasi-list" class="list-container">
-                <!-- Diisi oleh JS -->
-            </div>
-        </section>
+                <!-- ADMIN MENU -->
+                <ul id="menu-admin-list" class="nav-list hidden">
+                    <li class="nav-item active" data-target="view-admin-users">
+                        <span class="nav-icon">👥</span> Daftar Pengguna
+                    </li>
+                    <li class="nav-item" data-target="view-admin-feedbacks">
+                        <span class="nav-icon">📥</span> Ulasan & Laporan
+                    </li>
+                </ul>
+            </nav>
 
-        <!-- VIEW: MISI HARIAN -->
-        <section id="view-misi" class="view glass-panel">
-            <button class="btn back-btn" data-target="view-dashboard">⬅ Kembali ke Dashboard</button>
-            <h2>Misi Harian Anda 🎯</h2>
-            <div class="mission-card">
-                <input type="checkbox" id="misi1">
-                <label for="misi1">Lakukan pemanasan selama 5 menit</label>
+            <div class="sidebar-footer">
+                <button id="btn-logout" class="btn alert-btn outline-btn">Logout</button>
             </div>
-            <div class="mission-card">
-                <input type="checkbox" id="misi2">
-                <label for="misi2">Selesaikan sesi olahraga rekomendasi AI hari ini</label>
-            </div>
-            <div class="mission-card">
-                <input type="checkbox" id="misi3">
-                <label for="misi3">Minum 2 liter air putih setelah berolahraga</label>
-            </div>
-        </section>
+        </aside>
 
-        <!-- VIEW: TIMER -->
-        <section id="view-timer" class="view glass-panel">
-            <button class="btn back-btn" data-target="view-dashboard">⬅ Kembali ke Dashboard</button>
-            <h2>Sesi Olahraga ⏱️</h2>
-            <p>Waktu yang disarankan AI: <strong id="ai-timer-recommendation">-- menit</strong></p>
-            
-            <div class="timer-display" id="timer-display">00:00</div>
-            
-            <div class="timer-controls">
-                <button id="btn-start-timer" class="btn primary-btn">Mulai</button>
-                <button id="btn-pause-timer" class="btn outline-btn">Jeda</button>
-                <button id="btn-reset-timer" class="btn alert-btn">Reset</button>
-            </div>
-        </section>
+        <!-- RIGHT CONTENT AREA -->
+        <main class="content-area">
+            <!-- VIEW: USER DASHBOARD -->
+            <section id="view-dashboard" class="content-view active-view">
+                <div class="view-header">
+                    <h2>Dashboard Olahraga Anda</h2>
+                    <p>Pantau perkembangan biometrik dan kebugaran Anda hari ini.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- AI Motivation Card -->
+                    <div class="glass-panel highlight-panel ai-motivation-card">
+                        <h3>💡 AI Motivasi Hari Ini</h3>
+                        <p id="ai-motivation-text">Silakan lengkapi profil biometrik Anda terlebih dahulu di menu sebelah kiri agar AI dapat menyusun kalimat motivasi khusus untuk Anda!</p>
+                    </div>
+
+                    <!-- Health Status Card -->
+                    <div class="glass-panel info-card">
+                        <h3>Profil Biometrik Anda</h3>
+                        <ul class="stats-list">
+                            <li><span>Usia:</span> <strong id="dash-age">--</strong></li>
+                            <li><span>IMT (BMI):</span> <strong id="dash-bmi">--</strong></li>
+                            <li><span>Status Tubuh:</span> <strong id="dash-status" class="accent">--</strong></li>
+                            <li><span>Kondisi Khusus:</span> <strong id="dash-disability">--</strong></li>
+                        </ul>
+                    </div>
+
+                    <!-- Mission Progress Card -->
+                    <div class="glass-panel info-card progress-dashboard-card">
+                        <h3>Progres Misi Hari Ini</h3>
+                        <div class="dashboard-progress-container">
+                            <div class="dashboard-progress-bar">
+                                <div id="dash-progress-fill" class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <span id="dash-progress-percent" class="progress-percentage-text">0% Selesai</span>
+                        </div>
+                        <p class="sub-text">Selesaikan semua misi dan dapatkan apresiasi khusus dari AI!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: LENGKAPI IDENTITAS -->
+            <section id="view-identitas" class="content-view">
+                <div class="view-header">
+                    <h2>Lengkapi Identitas & Biometrik</h2>
+                    <p>Bantu AI mengidentifikasi kondisi tubuh Anda untuk hasil olahraga dan nutrisi yang optimal.</p>
+                </div>
+
+                <form id="identitas-form" class="glass-panel form-panel">
+                    <div class="form-group">
+                        <label for="age">Usia Anda (10 - 65 tahun):</label>
+                        <input type="number" id="age" min="10" max="65" required placeholder="Contoh: 25">
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="weight">Berat Badan (kg):</label>
+                            <input type="number" id="weight" min="20" max="200" required placeholder="Contoh: 60">
+                        </div>
+                        <div class="form-group">
+                            <label for="height">Tinggi Badan (cm):</label>
+                            <input type="number" id="height" min="100" max="250" required placeholder="Contoh: 170">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="disability">Kondisi Khusus / Disabilitas:</label>
+                        <select id="disability">
+                            <option value="none">Tidak Ada (Sehat bugar)</option>
+                            <option value="wheelchair">Pengguna Kursi Roda</option>
+                            <option value="asthma">Asma Ringan</option>
+                            <option value="joint_pain">Nyeri Sendi / Rematik / Lansia</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn primary-btn">Simpan Profil Biometrik</button>
+                </form>
+            </section>
+
+            <!-- VIEW: REKOMENDASI AI -->
+            <section id="view-rekomendasi" class="content-view">
+                <div class="view-header">
+                    <h2>Rekomendasi AI 🤖</h2>
+                    <p>Program kebugaran dan gizi ramah kantong yang disusun khusus untuk Anda.</p>
+                </div>
+
+                <div class="recs-grid">
+                    <!-- WORKOUT RECOMMENDATIONS -->
+                    <div class="glass-panel rec-card">
+                        <h3>🏃 Rekomendasi Olahraga Cerdas</h3>
+                        <div id="recs-workout-container" class="recs-container">
+                            <p class="muted-text">Menunggu analisis profil biometrik Anda...</p>
+                        </div>
+                    </div>
+
+                    <!-- NUTRITION RECOMMENDATIONS -->
+                    <div class="glass-panel rec-card">
+                        <h3>🍎 Gizi & Makanan Murah Bergizi</h3>
+                        <div id="recs-nutrition-container" class="recs-container">
+                            <p class="muted-text">Menunggu analisis profil biometrik Anda...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: MISI HARIAN -->
+            <section id="view-misi" class="content-view">
+                <div class="view-header">
+                    <h2>Misi Harian Anda 🎯</h2>
+                    <p>Selesaikan latihan harian ini untuk membentuk kedisiplinan hidup sehat.</p>
+                </div>
+
+                <div class="glass-panel mission-panel">
+                    <!-- Progress Bar -->
+                    <div class="mission-progress-header">
+                        <h3>Progres Hari Ini</h3>
+                        <span id="mission-progress-text">0% (0 dari 3 Misi)</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="mission-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+
+                    <!-- Checked list -->
+                    <div class="mission-list">
+                        <div class="mission-item">
+                            <input type="checkbox" id="misi-warmup" class="mission-checkbox">
+                            <label for="misi-warmup">Lakukan pemanasan peregangan otot selama 5 menit</label>
+                        </div>
+                        <div class="mission-item">
+                            <input type="checkbox" id="misi-workout" class="mission-checkbox">
+                            <label for="misi-workout">Selesaikan rekomendasi olahraga AI hari ini</label>
+                        </div>
+                        <div class="mission-item">
+                            <input type="checkbox" id="misi-hydrate" class="mission-checkbox">
+                            <label for="misi-hydrate">Minum 2 liter air putih dan konsumsi makanan rekomendasi AI</label>
+                        </div>
+                    </div>
+
+                    <!-- Save lock button -->
+                    <button id="btn-save-history" class="btn primary-btn">Simpan Riwayat Misi Hari Ini 💾</button>
+                </div>
+
+                <!-- AI Appreciation Popup Card (Hidden initially) -->
+                <div id="ai-appreciation-card" class="glass-panel highlight-panel ai-appreciation-popup hidden">
+                    <h3>🏆 Apresiasi Keberhasilan AI</h3>
+                    <p id="ai-appreciation-text-content">Luar biasa! Anda telah menyelesaikan semua misi hari ini. Tetap konsisten!</p>
+                    <button id="btn-close-appreciation" class="btn small-btn outline-btn">Tutup</button>
+                </div>
+            </section>
+
+            <!-- VIEW: TIMER OLAHRAGA -->
+            <section id="view-timer" class="content-view">
+                <div class="view-header">
+                    <h2>Timer Sesi Olahraga ⏱️</h2>
+                    <p>Sesi latihan terpandu yang disesuaikan secara cerdas dengan daya tahan fisik Anda.</p>
+                </div>
+
+                <div class="glass-panel timer-panel">
+                    <p>Waktu latihan direkomendasikan AI: <strong id="timer-ai-recommendation" class="accent">-- menit</strong></p>
+                    
+                    <div class="timer-circle-container">
+                        <div class="timer-circle">
+                            <div class="timer-display" id="timer-time-display">00:00</div>
+                        </div>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button id="btn-timer-start" class="btn primary-btn">Mulai</button>
+                        <button id="btn-timer-pause" class="btn outline-btn">Jeda</button>
+                        <button id="btn-timer-reset" class="btn alert-btn outline-btn">Reset</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: RIWAYAT MISI -->
+            <section id="view-riwayat" class="content-view">
+                <div class="view-header">
+                    <h2>Riwayat Aktivitas Olahraga 📜</h2>
+                    <p>Catatan rekam jejak perjuangan hidup sehat Anda dari hari ke hari.</p>
+                </div>
+
+                <div class="glass-panel history-panel">
+                    <h3>Kalender Riwayat Latihan</h3>
+                    <div id="history-list-container" class="history-list-container">
+                        <!-- Rendered by JS -->
+                        <p class="muted-text">Belum ada riwayat aktivitas yang tercatat. Selesaikan misi harian Anda dan simpan riwayatnya!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: KIRIM ULASAN & LAPORAN -->
+            <section id="view-feedback" class="content-view">
+                <div class="view-header">
+                    <h2>Penilaian & Laporan Kendala 📝</h2>
+                    <p>Berikan ulasan Anda terhadap aplikasi atau laporkan bug yang Anda temukan untuk perbaikan kami.</p>
+                </div>
+
+                <form id="feedback-form" class="glass-panel form-panel">
+                    <!-- Rating Stars -->
+                    <div class="form-group">
+                        <label>Berikan Rating Anda:</label>
+                        <div class="star-rating">
+                            <span class="star-btn" data-value="1">★</span>
+                            <span class="star-btn" data-value="2">★</span>
+                            <span class="star-btn" data-value="3">★</span>
+                            <span class="star-btn" data-value="4">★</span>
+                            <span class="star-btn" data-value="5">★</span>
+                        </div>
+                        <input type="hidden" id="feedback-rating-value" required value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="feedback-review">Ulasan & Penilaian Aplikasi:</label>
+                        <textarea id="feedback-review" rows="3" required placeholder="Tuliskan pengalaman Anda menggunakan FitAI..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="feedback-report">Laporkan Masalah / Bug (Opsional):</label>
+                        <textarea id="feedback-report" rows="3" placeholder="Tuliskan jika ada kendala, eror, atau fitur yang lambat..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn primary-btn">Kirim Masukan Anda</button>
+                </form>
+            </section>
+
+            <!-- VIEW: ADMIN DAFTAR PENGGUNA -->
+            <section id="view-admin-users" class="content-view">
+                <div class="view-header">
+                    <h2>Panel Admin - Daftar Pengguna 👥</h2>
+                    <p>Pantau pengguna yang terdaftar beserta analisis biometrik dasar mereka.</p>
+                </div>
+
+                <div class="glass-panel admin-table-panel">
+                    <h3>Total Pengguna Terdaftar: <span id="admin-total-users" class="accent">0</span></h3>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama Lengkap</th>
+                                    <th>Email</th>
+                                    <th>Usia</th>
+                                    <th>Status IMT</th>
+                                    <th>Disabilitas/Medis</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ADMIN ULASAN & LAPORAN -->
+            <section id="view-admin-feedbacks" class="content-view">
+                <div class="view-header">
+                    <h2>Panel Admin - Ulasan & Laporan Masuk 📥</h2>
+                    <p>Evaluasi masukan pengguna serta pelajari kendala teknis yang dilaporkan.</p>
+                </div>
+
+                <div class="feedback-admin-grid">
+                    <!-- Reviews Box -->
+                    <div class="glass-panel admin-feed-box">
+                        <h3>Ulasan Pengguna ⭐</h3>
+                        <div id="admin-reviews-list" class="admin-feed-list">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Bug Reports Box -->
+                    <div class="glass-panel admin-feed-box">
+                        <h3>Laporan Kendala / Bug ⚙️</h3>
+                        <div id="admin-reports-list" class="admin-feed-list">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
     
     <script src="app.js"></script>
