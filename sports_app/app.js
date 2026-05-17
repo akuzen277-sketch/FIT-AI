@@ -68,6 +68,7 @@ const viewLoginRejected = document.getElementById('view-login-rejected');
 const modalLoginApproval = document.getElementById('modal-login-approval');
 
 const btnCancelPending = document.getElementById('btn-cancel-pending');
+const btnForceLogin = document.getElementById('btn-force-login');
 const btnRejectedOk = document.getElementById('btn-rejected-ok');
 const btnApproveLogin = document.getElementById('btn-approve-login');
 const btnRejectLogin = document.getElementById('btn-reject-login');
@@ -235,13 +236,40 @@ loginForm.addEventListener('submit', (e) => {
             }
         }, 1000);
 
+        // Force Login / Logout other sessions click handler
+        btnForceLogin.onclick = () => {
+            clearInterval(pollInterval);
+            
+            const forceSessionId = 'sess_' + Math.random().toString(36).substring(2) + Date.now();
+            const freshUsers = safeJSONParse('fitai_users', []);
+            const uIdx = freshUsers.findIndex(u => u.email === matchedUser.email);
+            if (uIdx !== -1) {
+                freshUsers[uIdx].activeSessionId = forceSessionId;
+                freshUsers[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
+                localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
+            }
+            
+            localStorage.setItem('fitai_session_id', forceSessionId);
+            
+            currentUser = matchedUser;
+            currentUser.activeSessionId = forceSessionId;
+            localStorage.setItem('fitai_current_user', JSON.stringify(currentUser));
+            
+            loginForm.reset();
+            viewLoginPending.classList.remove('active');
+            switchFullView(true);
+        };
+
         // Cancel button click handler
         btnCancelPending.onclick = () => {
             clearInterval(pollInterval);
-            const uIdx = users.findIndex(u => u.email === matchedUser.email);
+            const freshUsers = safeJSONParse('fitai_users', []);
+            const uIdx = freshUsers.findIndex(u => u.email === matchedUser.email);
             if (uIdx !== -1) {
-                users[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-                localStorage.setItem('fitai_users', JSON.stringify(users));
+                // Clear the active session lock so subsequent logins bypass the 2FA screen
+                freshUsers[uIdx].activeSessionId = "";
+                freshUsers[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
+                localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
             }
             viewLoginPending.classList.remove('active');
             viewLogin.classList.add('active');
