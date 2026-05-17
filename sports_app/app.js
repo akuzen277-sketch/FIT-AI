@@ -46,6 +46,9 @@ const menuAdminList = document.getElementById('menu-admin-list');
 const navItems = document.querySelectorAll('.nav-item');
 const contentViews = document.querySelectorAll('.content-view');
 
+const modalMultiDevice = document.getElementById('modal-multi-device');
+const btnMultiDeviceOk = document.getElementById('btn-multi-device-ok');
+
 // 3. PAGE NAVIGATION
 function switchFullView(showApp) {
     if (showApp) {
@@ -141,8 +144,23 @@ loginForm.addEventListener('submit', (e) => {
         return;
     }
 
+    // Generate unique session ID for multi-device detection
+    const newSessionId = 'sess_' + Math.random().toString(36).substring(2) + Date.now();
+    
+    // Update session ID in the persistent users list
+    const uIndex = users.findIndex(u => u.email === matchedUser.email);
+    if (uIndex !== -1) {
+        users[uIndex].activeSessionId = newSessionId;
+        localStorage.setItem('fitai_users', JSON.stringify(users));
+    }
+    
+    // Save to local storage variables
+    localStorage.setItem('fitai_session_id', newSessionId);
+    
     currentUser = matchedUser;
+    currentUser.activeSessionId = newSessionId;
     localStorage.setItem('fitai_current_user', JSON.stringify(currentUser));
+    
     loginForm.reset();
     switchFullView(true);
 });
@@ -150,6 +168,7 @@ loginForm.addEventListener('submit', (e) => {
 btnLogout.addEventListener('click', () => {
     currentUser = null;
     localStorage.removeItem('fitai_current_user');
+    localStorage.removeItem('fitai_session_id');
     switchFullView(false);
 });
 
@@ -899,11 +918,39 @@ function renderAdminFeedbacks() {
     }
 }
 
+// 12. MULTI DEVICE / DUAL SESSION CONTROLLER
+function checkSessionValidity() {
+    if (!currentUser) return;
+
+    const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    const freshUser = freshUsers.find(u => u.email === currentUser.email);
+    
+    if (freshUser) {
+        const localSessionId = localStorage.getItem('fitai_session_id');
+        
+        if (freshUser.activeSessionId && freshUser.activeSessionId !== localSessionId) {
+            modalMultiDevice.classList.remove('hidden');
+            currentUser = null;
+            localStorage.removeItem('fitai_current_user');
+            localStorage.removeItem('fitai_session_id');
+        }
+    }
+}
+
+btnMultiDeviceOk.addEventListener('click', () => {
+    modalMultiDevice.classList.add('hidden');
+    switchFullView(false);
+});
+
 // 13. AUTO BOOTSTRAP CHECK ON PAGE LOAD
 window.addEventListener('DOMContentLoaded', () => {
     if (currentUser) {
         switchFullView(true);
+        checkSessionValidity();
     } else {
         switchFullView(false);
     }
+    
+    // Run validation checks every 2 seconds
+    setInterval(checkSessionValidity, 2000);
 });
