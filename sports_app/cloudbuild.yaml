@@ -1,6 +1,7 @@
 steps:
   # Langkah 1: Build container image menggunakan Docker
   - name: 'gcr.io/cloud-builders/docker'
+    dir: 'sports_app'
     args: 
       - 'build'
       - '-t'
