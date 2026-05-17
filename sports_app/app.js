@@ -59,20 +59,6 @@ const menuAdminList = document.getElementById('menu-admin-list');
 
 const navItems = document.querySelectorAll('.nav-item');
 const contentViews = document.querySelectorAll('.content-view');
-
-const modalMultiDevice = document.getElementById('modal-multi-device');
-const btnMultiDeviceOk = document.getElementById('btn-multi-device-ok');
-
-const viewLoginPending = document.getElementById('view-login-pending');
-const viewLoginRejected = document.getElementById('view-login-rejected');
-const modalLoginApproval = document.getElementById('modal-login-approval');
-
-const btnCancelPending = document.getElementById('btn-cancel-pending');
-const btnForceLogin = document.getElementById('btn-force-login');
-const btnRejectedOk = document.getElementById('btn-rejected-ok');
-const btnApproveLogin = document.getElementById('btn-approve-login');
-const btnRejectLogin = document.getElementById('btn-reject-login');
-
 // 3. PAGE NAVIGATION
 function switchFullView(showApp) {
     if (showApp) {
@@ -170,133 +156,7 @@ loginForm.addEventListener('submit', (e) => {
         return;
     }
 
-    // Check if the user is already logged in on another device/tab
-    const hasActiveSession = matchedUser.activeSessionId && matchedUser.activeSessionId !== "";
-
-    if (hasActiveSession) {
-        const reqSessionId = 'sess_' + Math.random().toString(36).substring(2) + Date.now();
-        
-        // Set pending login request
-        const uIndex = users.findIndex(u => u.email === matchedUser.email);
-        if (uIndex !== -1) {
-            users[uIndex].loginRequest = {
-                status: "pending",
-                requestedSessionId: reqSessionId,
-                requestingDevice: "Tab/Perangkat Lain"
-            };
-            localStorage.setItem('fitai_users', JSON.stringify(users));
-        }
-
-        // Enter Pending Approval UI
-        viewLogin.classList.remove('active');
-        viewLoginPending.classList.add('active');
-
-        // Start polling approval status from local database
-        let pollInterval = setInterval(() => {
-            const freshUsers = safeJSONParse('fitai_users', []);
-            const freshUser = freshUsers.find(u => u.email === matchedUser.email);
-            
-            if (freshUser && freshUser.loginRequest) {
-                const reqStatus = freshUser.loginRequest.status;
-                
-                if (reqStatus === "approved") {
-                    clearInterval(pollInterval);
-                    
-                    localStorage.setItem('fitai_session_id', reqSessionId);
-                    currentUser = freshUser;
-                    currentUser.activeSessionId = reqSessionId;
-                    
-                    // Reset request & lock new session ID
-                    const uIdx = users.findIndex(u => u.email === matchedUser.email);
-                    if (uIdx !== -1) {
-                        users[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-                        users[uIdx].activeSessionId = reqSessionId;
-                        localStorage.setItem('fitai_users', JSON.stringify(users));
-                    }
-                    
-                    localStorage.setItem('fitai_current_user', JSON.stringify(currentUser));
-                    
-                    loginForm.reset();
-                    viewLoginPending.classList.remove('active');
-                    switchFullView(true);
-                    
-                } else if (reqStatus === "rejected") {
-                    clearInterval(pollInterval);
-                    
-                    // Reset status in DB
-                    const uIdx = users.findIndex(u => u.email === matchedUser.email);
-                    if (uIdx !== -1) {
-                        users[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-                        localStorage.setItem('fitai_users', JSON.stringify(users));
-                    }
-                    
-                    viewLoginPending.classList.remove('active');
-                    viewLoginRejected.classList.add('active');
-                }
-            }
-        }, 1000);
-
-        // Force Login / Logout other sessions click handler
-        btnForceLogin.onclick = () => {
-            clearInterval(pollInterval);
-            
-            const forceSessionId = 'sess_' + Math.random().toString(36).substring(2) + Date.now();
-            const freshUsers = safeJSONParse('fitai_users', []);
-            const uIdx = freshUsers.findIndex(u => u.email === matchedUser.email);
-            if (uIdx !== -1) {
-                freshUsers[uIdx].activeSessionId = forceSessionId;
-                freshUsers[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-                localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
-            }
-            
-            localStorage.setItem('fitai_session_id', forceSessionId);
-            
-            currentUser = matchedUser;
-            currentUser.activeSessionId = forceSessionId;
-            localStorage.setItem('fitai_current_user', JSON.stringify(currentUser));
-            
-            loginForm.reset();
-            viewLoginPending.classList.remove('active');
-            switchFullView(true);
-        };
-
-        // Cancel button click handler
-        btnCancelPending.onclick = () => {
-            clearInterval(pollInterval);
-            const freshUsers = safeJSONParse('fitai_users', []);
-            const uIdx = freshUsers.findIndex(u => u.email === matchedUser.email);
-            if (uIdx !== -1) {
-                // Clear the active session lock so subsequent logins bypass the 2FA screen
-                freshUsers[uIdx].activeSessionId = "";
-                freshUsers[uIdx].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-                localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
-            }
-            viewLoginPending.classList.remove('active');
-            viewLogin.classList.add('active');
-        };
-
-        // Rejected OK click handler
-        btnRejectedOk.onclick = () => {
-            viewLoginRejected.classList.remove('active');
-            viewLogin.classList.add('active');
-        };
-        
-        return;
-    }
-
-    // Direct Login (No active sessions elsewhere)
-    const newSessionId = 'sess_' + Math.random().toString(36).substring(2) + Date.now();
-    const uIndex = users.findIndex(u => u.email === matchedUser.email);
-    if (uIndex !== -1) {
-        users[uIndex].activeSessionId = newSessionId;
-        users[uIndex].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-        localStorage.setItem('fitai_users', JSON.stringify(users));
-    }
-    
-    localStorage.setItem('fitai_session_id', newSessionId);
-    
     currentUser = matchedUser;
-    currentUser.activeSessionId = newSessionId;
     localStorage.setItem('fitai_current_user', JSON.stringify(currentUser));
     
     loginForm.reset();
@@ -304,16 +164,6 @@ loginForm.addEventListener('submit', (e) => {
 });
 
 btnLogout.addEventListener('click', () => {
-    if (currentUser) {
-        // Clear active session ID in the shared DB so subsequent logins bypass the 2FA check
-        const freshUsers = safeJSONParse('fitai_users', []);
-        const uIndex = freshUsers.findIndex(u => u.email === currentUser.email);
-        if (uIndex !== -1) {
-            freshUsers[uIndex].activeSessionId = "";
-            freshUsers[uIndex].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
-            localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
-        }
-    }
     currentUser = null;
     localStorage.removeItem('fitai_current_user');
     localStorage.removeItem('fitai_session_id');
@@ -1067,80 +917,11 @@ function renderAdminFeedbacks() {
     }
 }
 
-// 12. MULTI DEVICE / DUAL SESSION CONTROLLER
-function checkSessionValidity() {
-    if (!currentUser) return;
-
-    const freshUsers = safeJSONParse('fitai_users', []);
-    const freshUser = freshUsers.find(u => u.email === currentUser.email);
-    
-    if (freshUser) {
-        const localSessionId = localStorage.getItem('fitai_session_id');
-        
-        // Case 1: Active session was replaced by another approved session
-        if (freshUser.activeSessionId && freshUser.activeSessionId !== localSessionId) {
-            modalMultiDevice.classList.remove('hidden');
-            modalLoginApproval.classList.add('hidden'); // hide approval if showing
-            currentUser = null;
-            localStorage.removeItem('fitai_current_user');
-            localStorage.removeItem('fitai_session_id');
-            return;
-        }
-
-        // Case 2: Incoming login request is pending
-        if (freshUser.loginRequest && freshUser.loginRequest.status === "pending") {
-            modalLoginApproval.classList.remove('hidden');
-        }
-    }
-}
-
-btnApproveLogin.addEventListener('click', () => {
-    modalLoginApproval.classList.add('hidden');
-    
-    const freshUsers = safeJSONParse('fitai_users', []);
-    const uIdx = freshUsers.findIndex(u => u.email === currentUser.email);
-    if (uIdx !== -1 && freshUsers[uIdx].loginRequest) {
-        const targetSessionId = freshUsers[uIdx].loginRequest.requestedSessionId;
-        
-        // Approve & hand over active session ID
-        freshUsers[uIdx].loginRequest.status = "approved";
-        freshUsers[uIdx].activeSessionId = targetSessionId;
-        localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
-        
-        // Immediately kick ourselves out to let the other device in
-        currentUser = null;
-        localStorage.removeItem('fitai_current_user');
-        localStorage.removeItem('fitai_session_id');
-        switchFullView(false);
-    }
-});
-
-btnRejectLogin.addEventListener('click', () => {
-    modalLoginApproval.classList.add('hidden');
-    
-    const freshUsers = safeJSONParse('fitai_users', []);
-    const uIdx = freshUsers.findIndex(u => u.email === currentUser.email);
-    if (uIdx !== -1 && freshUsers[uIdx].loginRequest) {
-        // Reject access
-        freshUsers[uIdx].loginRequest.status = "rejected";
-        localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
-    }
-});
-
-btnMultiDeviceOk.addEventListener('click', () => {
-    modalMultiDevice.classList.add('hidden');
-    switchFullView(false);
-});
-
-// 13. AUTO BOOTSTRAP CHECK ON PAGE LOAD
+// 12. AUTO BOOTSTRAP CHECK ON PAGE LOAD
 window.addEventListener('DOMContentLoaded', () => {
     if (currentUser) {
         switchFullView(true);
-        checkSessionValidity();
     } else {
         switchFullView(false);
     }
-    
-    // Run validation checks every 2 seconds
-    setInterval(checkSessionValidity, 2000);
 });

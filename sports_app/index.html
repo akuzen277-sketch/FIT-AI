@@ -34,23 +34,6 @@
             </form>
             <p class="auth-switch">Sudah punya akun? <span id="link-to-login">Login di sini</span></p>
         </section>
-
-        <!-- VIEW: LOGIN PENDING APPROVAL -->
-        <section id="view-login-pending" class="view auth-panel glass-panel">
-            <div class="loader-spinner"></div>
-            <h2>Menunggu Persetujuan 🔒</h2>
-            <p class="subtitle" style="margin-top: 1rem; line-height: 1.6;">Akun Anda sedang aktif di perangkat lain. Silakan buka perangkat tersebut dan pilih <strong>"Ya, itu saya"</strong> untuk mengizinkan akses masuk.</p>
-            <button id="btn-force-login" class="btn primary-btn" style="margin-bottom: 1rem; background: linear-gradient(135deg, var(--accent-cyan), #0099ff); border: none; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);">Keluarkan Sesi Lain & Masuk</button>
-            <button id="btn-cancel-pending" class="btn outline-btn alert-btn">Batalkan Permintaan</button>
-        </section>
-
-        <!-- VIEW: LOGIN REJECTED -->
-        <section id="view-login-rejected" class="view auth-panel glass-panel">
-            <div class="modal-icon">❌</div>
-            <h2 style="color: var(--accent-alert); margin-bottom: 0.5rem;">Akses Masuk Ditolak!</h2>
-            <p class="subtitle" style="margin-top: 1rem; line-height: 1.6;">Pemilik akun yang aktif menolak permintaan masuk Anda karena dicurigai sebagai pembajakan akun.</p>
-            <button id="btn-rejected-ok" class="btn primary-btn">Kembali ke Login</button>
-        </section>
     </div>
 
     <!-- MAIN APP LAYOUT (SIDEBAR + CONTENT - HIDDEN BY DEFAULT) -->
@@ -389,27 +372,6 @@
         </main>
     </div>
     <!-- MODAL: MULTI DEVICE DETECTED -->
-    <div id="modal-multi-device" class="modal-overlay hidden">
-        <div class="glass-panel modal-card alert-panel">
-            <div class="modal-icon">⚠️</div>
-            <h2>Sesi Login Ganda Terdeteksi</h2>
-            <p>Akun Anda baru saja masuk di perangkat atau tab browser lain. Untuk keamanan, sesi aktif di perangkat ini telah dinonaktifkan.</p>
-            <button id="btn-multi-device-ok" class="btn primary-btn">Login Ulang</button>
-        </div>
-    </div>
-    <!-- MODAL: LOGIN APPROVAL PROMPT -->
-    <div id="modal-login-approval" class="modal-overlay hidden">
-        <div class="glass-panel modal-card highlight-panel" style="border-color: var(--accent-cyan); box-shadow: 0 0 40px rgba(0, 255, 255, 0.25);">
-            <div class="modal-icon" style="animation: pulseGlow 1.5s infinite alternate;">🔒</div>
-            <h2>Konfirmasi Akses Masuk</h2>
-            <p style="margin: 1rem 0 2rem 0; font-size: 1.1rem; line-height: 1.6;">Apakah Anda mencoba masuk ke akun ini dari perangkat atau tab browser lain?</p>
-            <div class="form-group-row">
-                <button id="btn-approve-login" class="btn primary-btn">Ya, itu saya</button>
-                <button id="btn-reject-login" class="btn outline-btn alert-btn">Tidak, bukan saya</button>
-            </div>
-        </div>
-    </div>
-    
     <script src="app.js?v=1.0.1"></script>
 </body>
 </html>
