@@ -113,6 +113,7 @@ navItems.forEach(item => {
 // 4. AUTHENTICATION CONTROLLER
 registerForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    users = JSON.parse(localStorage.getItem('fitai_users')) || [];
     const name = regName.value.trim();
     const email = regEmail.value.trim().toLowerCase();
     const password = regPassword.value;
@@ -143,6 +144,7 @@ registerForm.addEventListener('submit', (e) => {
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    users = JSON.parse(localStorage.getItem('fitai_users')) || [];
     const email = loginEmail.value.trim().toLowerCase();
     const password = loginPassword.value;
 
@@ -342,6 +344,7 @@ identitasForm.addEventListener('submit', (e) => {
 });
 
 function updateUserInDatabase(userObj) {
+    users = JSON.parse(localStorage.getItem('fitai_users')) || [];
     users = users.map(u => u.email === userObj.email ? userObj : u);
     localStorage.setItem('fitai_users', JSON.stringify(users));
     localStorage.setItem('fitai_current_user', JSON.stringify(userObj));
