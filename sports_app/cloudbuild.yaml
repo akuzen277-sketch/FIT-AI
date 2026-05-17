@@ -1,0 +1,39 @@
+steps:
+  # Langkah 1: Build container image menggunakan Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/fitai-sports-app:$COMMIT_SHA'
+      - '.'
+  
+  # Langkah 2: Push container image ke Google Container Registry (GCR)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/fitai-sports-app:$COMMIT_SHA'
+  
+  # Langkah 3: Deploy image ke Google Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'fitai-sports-app' # Nama service Cloud Run Anda
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/fitai-sports-app:$COMMIT_SHA'
+      - '--region'
+      - 'asia-southeast2' # Region Jakarta (bisa diubah sesuai keinginan)
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated' # Mengizinkan akses publik
+      - '--port'
+      - '8080' # Port yang digunakan Nginx di Dockerfile
+
+# Otomatis mendaftarkan image ke Container Registry setelah build selesai
+images:
+  - 'gcr.io/$PROJECT_ID/fitai-sports-app:$COMMIT_SHA'
+
+# Tambahkan opsi logging untuk mengatasi error service_account
+options:
+  logging: CLOUD_LOGGING_ONLY

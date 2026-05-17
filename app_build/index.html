@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Connect & OSINT Dashboard</title>
+    <meta name="description" content="Quickly connect via WhatsApp and view public OSINT info for phone numbers.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Phone Connect</h1>
+            <p>Enter a WhatsApp number to instantly connect and view public OSINT details.</p>
+        </header>
+
+        <main>
+            <section class="search-section glass-panel">
+                <form id="search-form">
+                    <div class="input-group">
+                        <span class="prefix">+</span>
+                        <input type="tel" id="phone-input" placeholder="CountryCode Phone (e.g., 1234567890)" required pattern="[0-9]{5,15}">
+                    </div>
+                    <button type="submit" class="btn primary-btn">Search & Connect</button>
+                </form>
+            </section>
+
+            <section id="results-section" class="results-section hidden">
+                <div class="action-card glass-panel highlight-panel">
+                    <h2>Direct Connect</h2>
+                    <p>Start a WhatsApp chat without saving the number to your contacts.</p>
+                    <a id="wa-link" href="#" target="_blank" class="btn wa-btn">Open in WhatsApp</a>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="info-card glass-panel">
+                        <h3>Public Number Info (Mock)</h3>
+                        <ul class="info-list">
+                            <li><strong>Country:</strong> <span id="res-country">--</span></li>
+                            <li><strong>Carrier:</strong> <span id="res-carrier">--</span></li>
+                            <li><strong>Line Type:</strong> <span id="res-type">--</span></li>
+                            <li><strong>Valid:</strong> <span id="res-valid">--</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="links-card glass-panel">
+                        <h3>OSINT Quick Links</h3>
+                        <ul class="quick-links">
+                            <li><a id="google-link" href="#" target="_blank">🔍 Google Search</a></li>
+                            <li><a id="truecaller-link" href="#" target="_blank">📞 Truecaller Web</a></li>
+                            <li><a id="facebook-link" href="#" target="_blank">👥 Facebook Search</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
