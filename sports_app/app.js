@@ -1,6 +1,20 @@
 // --- FITAI APP LOGIC ---
 
-// 1. DATABASE INITIALIZATION (LOCAL STORAGE)
+// 1. SAFE DATABASE PARSER
+function safeJSONParse(key, defaultValue) {
+    try {
+        const item = localStorage.getItem(key);
+        if (!item || item === "undefined") return defaultValue;
+        return JSON.parse(item);
+    } catch (e) {
+        console.error(`Error parsing localStorage key "${key}":`, e);
+        // Clear corrupted item to heal database
+        localStorage.removeItem(key);
+        return defaultValue;
+    }
+}
+
+// DATABASE INITIALIZATION
 const defaultAdmin = {
     name: "Administrator",
     email: "admin@fitai.com",
@@ -8,8 +22,8 @@ const defaultAdmin = {
     role: "admin"
 };
 
-let users = JSON.parse(localStorage.getItem('fitai_users')) || [];
-let feedbacks = JSON.parse(localStorage.getItem('fitai_feedbacks')) || [];
+let users = safeJSONParse('fitai_users', []);
+let feedbacks = safeJSONParse('fitai_feedbacks', []);
 
 // Ensure admin exists in DB
 if (!users.some(u => u.email === defaultAdmin.email)) {
@@ -17,7 +31,7 @@ if (!users.some(u => u.email === defaultAdmin.email)) {
     localStorage.setItem('fitai_users', JSON.stringify(users));
 }
 
-let currentUser = JSON.parse(localStorage.getItem('fitai_current_user')) || null;
+let currentUser = safeJSONParse('fitai_current_user', null);
 
 // 2. DOM ELEMENTS
 const authContainer = document.getElementById('auth-container');
@@ -113,7 +127,7 @@ navItems.forEach(item => {
 // 4. AUTHENTICATION CONTROLLER
 registerForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    users = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    users = safeJSONParse('fitai_users', []);
     const name = regName.value.trim();
     const email = regEmail.value.trim().toLowerCase();
     const password = regPassword.value;
@@ -144,7 +158,7 @@ registerForm.addEventListener('submit', (e) => {
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    users = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    users = safeJSONParse('fitai_users', []);
     const email = loginEmail.value.trim().toLowerCase();
     const password = loginPassword.value;
 
@@ -178,7 +192,7 @@ loginForm.addEventListener('submit', (e) => {
 
         // Start polling approval status from local database
         let pollInterval = setInterval(() => {
-            const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+            const freshUsers = safeJSONParse('fitai_users', []);
             const freshUser = freshUsers.find(u => u.email === matchedUser.email);
             
             if (freshUser && freshUser.loginRequest) {
@@ -264,7 +278,7 @@ loginForm.addEventListener('submit', (e) => {
 btnLogout.addEventListener('click', () => {
     if (currentUser) {
         // Clear active session ID in the shared DB so subsequent logins bypass the 2FA check
-        const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+        const freshUsers = safeJSONParse('fitai_users', []);
         const uIndex = freshUsers.findIndex(u => u.email === currentUser.email);
         if (uIndex !== -1) {
             freshUsers[uIndex].activeSessionId = "";
@@ -344,7 +358,7 @@ identitasForm.addEventListener('submit', (e) => {
 });
 
 function updateUserInDatabase(userObj) {
-    users = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    users = safeJSONParse('fitai_users', []);
     users = users.map(u => u.email === userObj.email ? userObj : u);
     localStorage.setItem('fitai_users', JSON.stringify(users));
     localStorage.setItem('fitai_current_user', JSON.stringify(userObj));
@@ -978,7 +992,7 @@ function renderAdminUsersTable() {
 function renderAdminFeedbacks() {
     if (!currentUser || currentUser.role !== 'admin') return;
 
-    const allFeedbacks = JSON.parse(localStorage.getItem('fitai_feedbacks')) || [];
+    const allFeedbacks = safeJSONParse('fitai_feedbacks', []);
 
     // Filter Feedbacks
     const reviewsOnly = allFeedbacks.filter(f => f.review !== "");
@@ -1029,7 +1043,7 @@ function renderAdminFeedbacks() {
 function checkSessionValidity() {
     if (!currentUser) return;
 
-    const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    const freshUsers = safeJSONParse('fitai_users', []);
     const freshUser = freshUsers.find(u => u.email === currentUser.email);
     
     if (freshUser) {
@@ -1055,7 +1069,7 @@ function checkSessionValidity() {
 btnApproveLogin.addEventListener('click', () => {
     modalLoginApproval.classList.add('hidden');
     
-    const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    const freshUsers = safeJSONParse('fitai_users', []);
     const uIdx = freshUsers.findIndex(u => u.email === currentUser.email);
     if (uIdx !== -1 && freshUsers[uIdx].loginRequest) {
         const targetSessionId = freshUsers[uIdx].loginRequest.requestedSessionId;
@@ -1076,7 +1090,7 @@ btnApproveLogin.addEventListener('click', () => {
 btnRejectLogin.addEventListener('click', () => {
     modalLoginApproval.classList.add('hidden');
     
-    const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+    const freshUsers = safeJSONParse('fitai_users', []);
     const uIdx = freshUsers.findIndex(u => u.email === currentUser.email);
     if (uIdx !== -1 && freshUsers[uIdx].loginRequest) {
         // Reject access
