@@ -157,9 +157,10 @@ btnLogout.addEventListener('click', () => {
 function setupAppForRole() {
     if (!currentUser) return;
 
-    sidebarUserName.textContent = currentUser.name;
+    const name = currentUser.name || "User";
+    sidebarUserName.textContent = name;
     sidebarUserRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'User';
-    sidebarUserAvatarInitials.textContent = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    sidebarUserAvatarInitials.textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
     // Reset view visibility
     contentViews.forEach(v => v.classList.remove('active-view'));

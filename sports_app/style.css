@@ -103,10 +103,15 @@ body {
 }
 
 .auth-panel {
+    display: none;
     width: 100%;
     max-width: 420px;
     text-align: center;
     animation: authFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.auth-panel.active {
+    display: block;
 }
 
 .auth-switch {
