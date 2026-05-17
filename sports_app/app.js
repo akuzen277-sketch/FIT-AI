@@ -260,6 +260,16 @@ loginForm.addEventListener('submit', (e) => {
 });
 
 btnLogout.addEventListener('click', () => {
+    if (currentUser) {
+        // Clear active session ID in the shared DB so subsequent logins bypass the 2FA check
+        const freshUsers = JSON.parse(localStorage.getItem('fitai_users')) || [];
+        const uIndex = freshUsers.findIndex(u => u.email === currentUser.email);
+        if (uIndex !== -1) {
+            freshUsers[uIndex].activeSessionId = "";
+            freshUsers[uIndex].loginRequest = { status: "idle", requestedSessionId: "", requestingDevice: "" };
+            localStorage.setItem('fitai_users', JSON.stringify(freshUsers));
+        }
+    }
     currentUser = null;
     localStorage.removeItem('fitai_current_user');
     localStorage.removeItem('fitai_session_id');
