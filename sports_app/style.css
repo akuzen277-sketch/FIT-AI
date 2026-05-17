@@ -926,3 +926,19 @@ input:focus, select:focus, textarea:focus {
     from { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 71, 87, 0.5)); }
     to { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255, 71, 87, 0.8)); }
 }
+
+/* --- SPINNING LOADER --- */
+.loader-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(0, 255, 136, 0.1);
+    border-top: 5px solid var(--accent-emerald);
+    border-radius: 50%;
+    margin: 0 auto 1.5rem auto;
+    animation: spinLoader 1s linear infinite;
+}
+
+@keyframes spinLoader {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
